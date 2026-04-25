@@ -2,10 +2,12 @@
 // Watches the ledger file for external changes and debounces the callback.
 // Uses the Obsidian Vault event API — not testable in isolation without a mock.
 
-import type { Vault, TAbstractFile } from 'obsidian';
+import type { Vault, TAbstractFile, EventRef } from 'obsidian';
 
 export class FileWatcher {
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Exposed so the plugin can pass it to this.registerEvent() for proper cleanup. */
+  readonly eventRef: EventRef;
 
   constructor(
     private vault: Vault,
@@ -13,7 +15,7 @@ export class FileWatcher {
     private isWriting: () => boolean,
     private onExternalChange: () => void,
   ) {
-    this.vault.on('modify', (file: TAbstractFile) => {
+    this.eventRef = this.vault.on('modify', (file: TAbstractFile) => {
       if (file.path !== this.ledgerPath) return;
       if (this.isWriting()) return; // plugin's own write — ignore
       if (this.debounceTimer !== null) clearTimeout(this.debounceTimer);
@@ -21,7 +23,7 @@ export class FileWatcher {
     });
   }
 
-  /** Call this when the plugin unloads to prevent timer leaks. */
+  /** Clears any pending debounce timer. Event cleanup is handled by the plugin via registerEvent(). */
   destroy(): void {
     if (this.debounceTimer !== null) {
       clearTimeout(this.debounceTimer);

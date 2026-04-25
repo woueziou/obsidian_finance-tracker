@@ -160,6 +160,12 @@ export const MarkdownSerializer = {
     };
   },
 
+  /** Return the canonical empty ledger file content used on first creation. */
+  empty(): string {
+    const today = new Date().toISOString().slice(0, 10);
+    return `---\ntitle: Finance Ledger\ncurrency: XOF\nupdated: ${today}\n---\n\n## Expenses\n\n## Income\n\n## Debts\n`;
+  },
+
   /**
    * Serialize a DataStore's current state to a canonical markdown string.
    * - Expenses grouped by date, dates sorted descending
