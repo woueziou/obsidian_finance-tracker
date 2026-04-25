@@ -75,3 +75,7 @@ export const DebtInputSchema    = DebtSchema.omit({ id: true });
 export type ExpenseInput = z.infer<typeof ExpenseInputSchema>;
 export type IncomeInput  = z.infer<typeof IncomeInputSchema>;
 export type DebtInput    = z.infer<typeof DebtInputSchema>;
+
+export type Expense = z.infer<typeof ExpenseSchema>;
+export type Income  = z.infer<typeof IncomeSchema>;
+export type Debt    = z.infer<typeof DebtSchema>;
