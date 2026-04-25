@@ -8,6 +8,10 @@ import { MarkdownSerializer } from './store/MarkdownSerializer';
 import { FileWatcher } from './store/FileWatcher';
 import { DEFAULT_SETTINGS } from './types';
 import type { PluginSettings } from './types';
+import { registerCommands } from './commands/index';
+import { AddExpenseModal } from './commands/addExpense';
+import { AddIncomeModal } from './commands/addIncome';
+import { AddDebtModal } from './commands/addDebt';
 
 export default class FinanceTrackerPlugin extends Plugin {
   store!: DataStore;
@@ -33,7 +37,7 @@ export default class FinanceTrackerPlugin extends Plugin {
     // registerEvent ensures Obsidian unregisters the vault listener on plugin unload
     this.registerEvent(this.fileWatcher.eventRef);
     this.registerRibbonButtons();
-    this.registerCommands();
+    registerCommands(this);
     this.addSettingTab(new FinanceTrackerSettingTab(this.app, this));
   }
 
@@ -142,42 +146,9 @@ export default class FinanceTrackerPlugin extends Plugin {
   // ---------------------------------------------------------------------------
 
   private registerRibbonButtons(): void {
-    this.addRibbonIcon('wallet', 'Add Expense', () => {
-      // Phase 4 will replace this with: new AddExpenseModal(this.app, this).open()
-      new Notice('Add Expense — coming in Phase 4');
-    });
-
-    this.addRibbonIcon('trending-up', 'Add Income', () => {
-      new Notice('Add Income — coming in Phase 4');
-    });
-
-    this.addRibbonIcon('credit-card', 'Add Debt', () => {
-      new Notice('Add Debt — coming in Phase 4');
-    });
-  }
-
-  // ---------------------------------------------------------------------------
-  // Command palette
-  // ---------------------------------------------------------------------------
-
-  private registerCommands(): void {
-    this.addCommand({
-      id: 'add-expense',
-      name: 'Add Expense',
-      callback: () => new Notice('Add Expense — coming in Phase 4'),
-    });
-
-    this.addCommand({
-      id: 'add-income',
-      name: 'Add Income',
-      callback: () => new Notice('Add Income — coming in Phase 4'),
-    });
-
-    this.addCommand({
-      id: 'add-debt',
-      name: 'Add Debt',
-      callback: () => new Notice('Add Debt — coming in Phase 4'),
-    });
+    this.addRibbonIcon('wallet', 'Add Expense', () => new AddExpenseModal(this.app, this).open());
+    this.addRibbonIcon('trending-up', 'Add Income', () => new AddIncomeModal(this.app, this).open());
+    this.addRibbonIcon('credit-card', 'Add Debt', () => new AddDebtModal(this.app, this).open());
   }
 }
 
