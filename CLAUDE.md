@@ -100,7 +100,8 @@ updated: 2026-04-25
 #### Starting a Phase
 
 1. **Discuss first** — before writing any code, review the phase's `context.md` and `research.md` with the user. Ask: "Should we update context or research before starting?" Make any agreed updates before branching.
-2. **Create a branch** named after the phase:
+2. **Run sokrates** (`/sokrates "phase N"`) — pre-flight check that the plan is coherent with the current codebase. Resolve any BLOCKED items before handing off to menelik. PROCEED WITH CAUTION items should be reviewed with the user.
+3. **Create a branch** named after the phase:
    ```
    git checkout -b phase-1-types-and-validation
    git checkout -b phase-2-parsing-and-datastore
@@ -133,8 +134,16 @@ Agents are loaded **on demand** via slash commands. Do not auto-invoke them.
 
 | Command | Agent | Purpose |
 |---|---|---|
+| `/sokrates` | sokrates | Pre-flight — verify plan/codebase coherence before implementation starts |
 | `/menelik` | menelik | Implementation — coding, branching, PRs |
 | `/ganfam` | ganfam | Validation — bug detection, plan gaps, doc cross-checks |
+
+**sokrates** — pre-flight checks. Invoke when the user says "pre-flight phase N", "check phase N before starting", or `/sokrates`. Run before menelik.
+- Reads plan files and the existing codebase — does NOT write any files
+- Checks that every import, type reference, and prerequisite file actually exists
+- Flags ambiguities in `implementation.md` that would force menelik to make undocumented judgment calls
+- Detects conflicts between what the plan intends to create and what is already in the repo
+- Verdict is CLEAR TO IMPLEMENT, PROCEED WITH CAUTION, or BLOCKED
 
 **menelik** — all implementation tasks. Invoke when the user says "start phase N", "implement [feature]", or `/menelik`.
 - Reads phase plan files before starting work
@@ -145,6 +154,7 @@ Agents are loaded **on demand** via slash commands. Do not auto-invoke them.
 - Reads `plans/<phase>/implementation.md` and `validation.md` to find gaps
 - Runs `tsc --noEmit --strict` and inspects code for bugs
 - Checks `docs/remote-resources.md` for relevant documentation; fetches docs via WebFetch to cross-validate the implementation
+- Updates `validation.md` with `[x]` / `❌` per item status
 - Writes `plans/<phase>/ganfam-review.md` with verdict, bugs, and concrete fix suggestions
 - Presents findings to user before saving the review file
 
