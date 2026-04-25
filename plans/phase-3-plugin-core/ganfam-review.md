@@ -2,7 +2,9 @@
 
 ## Verdict
 
-PASS WITH WARNINGS
+PASS
+
+All automated checks passed and all manual tests confirmed by the user in a live Obsidian dev vault on 2026-04-25.
 
 ---
 
@@ -31,6 +33,22 @@ PASS WITH WARNINGS
 
 ---
 
+## Manual Test Results (confirmed by user, 2026-04-25)
+
+All items below were validated in a live Obsidian dev vault:
+
+- Plugin appears in Settings → Community Plugins
+- Enabling plugin produces no errors in the developer console
+- `finance-ledger.md` is created in vault root on first enable
+- Created file contains valid frontmatter and three empty sections
+- Three ribbon icons visible with correct tooltips; all three show a Notice on click
+- All three commands appear in the command palette and are triggerable
+- Settings tab is visible; all three fields display, persist, and survive plugin restart
+- Store populates from ledger on reload; parse errors surface a Notice without blocking load
+- Plugin disables and re-enables cleanly with no console errors
+
+---
+
 ## Doc References Used
 
 - None fetched this pass — all findings were derived from static code inspection and existing skill files.
@@ -46,7 +64,7 @@ Both medium/low code fixes were applied directly to `src/main.ts`:
 
 ---
 
-## Suggestions
+## Suggestions (carry forward to Phase 4)
 
 - `src/store/MarkdownSerializer.ts` — fix `serializeIncomeLine` to include the `note` field before Phase 4 modals start writing income records; otherwise notes entered via modal will vanish on the next flush.
 - `src/main.ts` `FinanceTrackerSettingTab.display()` — add a non-empty guard on the currency `onChange` handler to prevent saving `""` as the currency.

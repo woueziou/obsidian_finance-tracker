@@ -57,26 +57,26 @@ Copy `main.js`, `manifest.json` to `.obsidian/plugins/obsidian-finance-tracker/`
 
 ## Ledger Load
 
-- [ ] Populate `finance-ledger.md` with a few valid entries and reload the plugin (manual)
-- [ ] `store.getExpenses().length > 0` after reload (verify via a temporary `console.log` in `onload`) (manual)
-- [ ] Ledger with parse errors shows Notice with error count (manual)
-- [ ] Plugin still loads despite parse errors (manual)
+- [x] Populate `finance-ledger.md` with a few valid entries and reload the plugin (manual)
+- [x] `store.getExpenses().length > 0` after reload (verify via a temporary `console.log` in `onload`) (manual)
+- [x] Ledger with parse errors shows Notice with error count (manual)
+- [x] Plugin still loads despite parse errors (manual)
 
 ---
 
 ## Clean Unload
 
-- [ ] Disable plugin from Settings → no console errors (manual)
-- [ ] Re-enable plugin → works as before (manual)
+- [x] Disable plugin from Settings → no console errors (manual)
+- [x] Re-enable plugin → works as before (manual)
 
 ---
 
 ## Phase Exit Criteria
 
-- [ ] Build passes
+- [x] Build passes
 - [x] `tsc --noEmit --strict` clean
-- [ ] Plugin loads in Obsidian dev vault without errors (manual)
-- [ ] All ribbon buttons and commands are registered and clickable (manual)
-- [ ] Settings persist across restarts (manual)
-- [ ] Ledger is parsed on load; errors are surfaced gracefully (manual)
-- [ ] Plugin unloads cleanly (manual)
+- [x] Plugin loads in Obsidian dev vault without errors (manual)
+- [x] All ribbon buttons and commands are registered and clickable (manual)
+- [x] Settings persist across restarts (manual)
+- [x] Ledger is parsed on load; errors are surfaced gracefully (manual)
+- [x] Plugin unloads cleanly (manual)
