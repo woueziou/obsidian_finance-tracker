@@ -7,9 +7,9 @@ All checks below must pass before Phase 3 is considered complete.
 ## Build Check
 
 - [ ] `npm run build` (or `bun run build`) completes with zero errors
-- [ ] `tsc --noEmit --strict` is clean on `src/main.ts`
+- [x] `tsc --noEmit --strict` is clean on `src/main.ts`
 - [ ] `main.js` is generated in the project root
-- [ ] No `any` in `src/main.ts`
+- [x] No `any` in `src/main.ts`
 
 ---
 
