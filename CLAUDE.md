@@ -1,106 +1,92 @@
 
-Default to using Bun instead of Node.js.
+## Project: Obsidian Finance Tracker Plugin
 
-- Use `bun <file>` instead of `node <file>` or `ts-node <file>`
-- Use `bun test` instead of `jest` or `vitest`
-- Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
-- Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
-- Use `bunx <package> <command>` instead of `npx <package> <command>`
-- Bun automatically loads .env, so don't use dotenv.
+A TypeScript-based Obsidian plugin for personal finance tracking. Target user: solo developer/freelancer in West Africa (Togo) tracking daily expenses, income, and debts.
 
-## APIs
+### Tech Stack
 
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
-- `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
-- `Bun.redis` for Redis. Don't use `ioredis`.
-- `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
-- `WebSocket` is built-in. Don't use `ws`.
-- Prefer `Bun.file` over `node:fs`'s readFile/writeFile
-- Bun.$`ls` instead of execa.
+- **Language**: TypeScript strict mode — no `any`
+- **Framework**: Obsidian API + esbuild
+- **Validation**: Zod
+- **Parsing**: Custom regex + state machine (no parser generators)
+- **Storage**: Obsidian Vault filesystem API
+- **Visualization**: Chart.js via CDN
+- **No external services**: all processing local, no cloud APIs
 
-## Testing
+### Project Structure
 
-Use `bun test` to run tests.
-
-```ts#index.test.ts
-import { test, expect } from "bun:test";
-
-test("hello world", () => {
-  expect(1).toBe(1);
-});
+```
+src/
+├── main.ts                  # Plugin entry point
+├── types.ts                 # Expense, Income, Debt, Ledger interfaces
+├── schemas.ts               # Zod validation schemas
+├── parsers/                 # expenseParser, incomeParser, debtParser
+├── store/                   # DataStore, MarkdownSerializer, FileWatcher
+├── commands/                # addExpense, addIncome, addDebt commands + modals
+├── views/                   # DashboardView, LedgerView, ChartView
+├── export/                  # CSV/JSON/SQL exporters and importers
+└── utils/                   # dateParser, validators, formatters, analytics
 ```
 
-## Frontend
+### Markdown DSL
 
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
+**Expenses**
+```markdown
+## Expenses
 
-Server:
-
-```ts#index.ts
-import index from "./index.html"
-
-Bun.serve({
-  routes: {
-    "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
-  },
-  development: {
-    hmr: true,
-    console: true,
-  }
-})
+### 2026-04-25
+- [food] 15000 XOF @ market: rice and vegetables
+- [subscription] 3000 XOF: Netflix monthly
 ```
 
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
+**Income**
+```markdown
+## Income
 
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
+### 2026-04-25
+- [salary] 150000 XOF from: April freelance work
 ```
 
-With the following `frontend.tsx`:
+**Debts**
+```markdown
+## Debts
 
-```tsx#frontend.tsx
-import React from "react";
-import { createRoot } from "react-dom/client";
-
-// import .css files directly and it works
-import './index.css';
-
-const root = createRoot(document.body);
-
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
-}
-
-root.render(<Frontend />);
+- amount: 100000 XOF, due: 2026-06-01, person: Kofi, note: laptop loan
 ```
 
-Then, run index.ts
-
-```sh
-bun --hot ./index.ts
+**Frontmatter**
+```markdown
+---
+title: Finance Ledger
+currency: XOF
+updated: 2026-04-25
+---
 ```
 
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
+### Key Implementation Rules
+
+- Store amounts in **cents** (integers) to avoid floating-point issues
+- Store dates as ISO 8601 strings (`YYYY-MM-DD`)
+- Use `crypto.randomUUID()` for IDs
+- Ledger file: vault root `finance-ledger.md` (configurable)
+- Use `this.app.vault.read()` / `this.app.vault.modify()` for file I/O
+- Debounce writes 1–2 seconds; never write on every keystroke
+- Lazy-load Chart.js only when dashboard opens
+- Unsubscribe from store subscriptions when views close
+
+### Record Types
+
+- **Expense**: id, date, amount (cents), type (subscription|food|misc|utility|transport), note, location
+- **Income**: id, date, amount (cents), type (salary|donation|loan|investment|other), note, source
+- **Debt**: id, amount (cents), dueDate, person, note, status (open|partial|paid), interestRate?
+
+### Implementation Phases
+
+1. **Types & Validation** — `types.ts`, `schemas.ts` (CRITICAL)
+2. **Parsing & DataStore** — parsers, DataStore, MarkdownSerializer (CRITICAL)
+3. **Plugin Core** — `main.ts`, ribbon buttons, settings tab (HIGH)
+4. **UI Modals** — AddExpense/Income/Debt commands + modals (HIGH)
+5. **Dashboard** — sidebar view, Chart.js charts, live updates (MEDIUM)
+6. **Export/Import** — CSV, JSON, SQL round-trips (MEDIUM)
+7. **Analytics** — monthly trends, category breakdowns, debt tracker (LOW)
+8. **Testing & Polish** — unit + integration tests, README (MEDIUM)
