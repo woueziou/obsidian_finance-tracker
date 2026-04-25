@@ -90,3 +90,68 @@ updated: 2026-04-25
 6. **Export/Import** — CSV, JSON, SQL round-trips (MEDIUM)
 7. **Analytics** — monthly trends, category breakdowns, debt tracker (LOW)
 8. **Testing & Polish** — unit + integration tests, README (MEDIUM)
+
+---
+
+### Development Workflow
+
+#### Starting a Phase
+
+1. **Discuss first** — before writing any code, review the phase's `context.md` and `research.md` with the user. Ask: "Should we update context or research before starting?" Make any agreed updates before branching.
+2. **Create a branch** named after the phase:
+   ```
+   git checkout -b phase-1-types-and-validation
+   git checkout -b phase-2-parsing-and-datastore
+   # etc.
+   ```
+   Branch off from the parent branch of the current phase (usually `main` for Phase 1, or the previous phase's branch if sequential).
+
+#### During a Phase
+
+- After completing each meaningful unit of work (a file, a feature, a test suite), **suggest a commit message** based on what was done. Do not commit silently — always present the message for approval first.
+- Follow the plan in `plans/<phase-name>/implementation.md`. If deviation is needed, explain why before proceeding.
+
+#### Finishing a Phase
+
+1. Verify all items in `plans/<phase-name>/validation.md` are checked off.
+2. **Write a report file** at `plans/<phase-name>/report.md` capturing:
+   - What was built and what files were created/modified
+   - Decisions made that deviated from the plan (and why)
+   - Known issues or deferred items
+   - Context the next phase needs to know (especially DataStore API changes, type renames, etc.)
+3. **Open a pull request** against the parent branch:
+   ```
+   gh pr create --title "Phase N: <phase name>" --body "..."
+   ```
+   PR description should reference the report file and list the validation checklist status.
+
+#### Agents
+
+Agents are loaded **on demand** via slash commands. Do not auto-invoke them.
+
+| Command | Agent | Purpose |
+|---|---|---|
+| `/menelik` | menelik | Implementation — coding, branching, PRs |
+| `/ganfam` | ganfam | Validation — bug detection, plan gaps, doc cross-checks |
+
+**menelik** — all implementation tasks. Invoke when the user says "start phase N", "implement [feature]", or `/menelik`.
+- Reads phase plan files before starting work
+- Follows branch → implement → suggest commit → PR workflow
+- Does not commit or open PRs without user confirmation
+
+**ganfam** — post-implementation review. Invoke when the user says "review phase N", "validate [feature]", or `/ganfam`.
+- Reads `plans/<phase>/implementation.md` and `validation.md` to find gaps
+- Runs `tsc --noEmit --strict` and inspects code for bugs
+- Checks `docs/remote-resources.md` for relevant documentation; fetches docs via WebFetch to cross-validate the implementation
+- Writes `plans/<phase>/ganfam-review.md` with verdict, bugs, and concrete fix suggestions
+- Presents findings to user before saving the review file
+
+#### Remote Resources
+
+Documentation links live in `docs/remote-resources.md`. Each entry has:
+- **title** (heading)
+- **tags** — for lookup by domain (obsidian, zod, chartjs, typescript…)
+- **url**
+- **description** — one sentence on when to reach for it
+
+ganfam reads this file before every validation pass. To add a new doc, supply a URL and ganfam will append it in the correct format.
