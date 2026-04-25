@@ -81,6 +81,9 @@ export default class FinanceTrackerPlugin extends Plugin {
         errors.forEach(e => console.warn(`[Finance Tracker] Line ${e.line}: ${e.message}`));
       }
       this.store.load(ledger);
+      console.log(
+        `[Finance Tracker] Ledger loaded — ${ledger.expenses.length} expenses, ${ledger.incomes.length} incomes, ${ledger.debts.length} debts`,
+      );
     } catch (err) {
       new Notice('Finance Tracker: failed to load ledger. Starting with empty store.');
       console.error('[Finance Tracker] loadLedger failed:', err);
