@@ -71,7 +71,7 @@ function serializeExpenseLine(e: Expense): string {
 }
 
 function serializeIncomeLine(i: Income): string {
-  return `- [${i.type}] ${i.amount / 100} ${i.currency} from: ${i.source}`;
+  return `- [${i.type}] ${i.amount / 100} ${i.currency} from: ${i.source}${i.note ? `: ${i.note}` : ''}`;
 }
 
 function serializeDebtLine(d: Debt): string {

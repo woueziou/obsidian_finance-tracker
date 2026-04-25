@@ -40,9 +40,13 @@ export default class FinanceTrackerPlugin extends Plugin {
   override async onunload(): Promise<void> {
     if (this.saveTimer) {
       clearTimeout(this.saveTimer);
-      await this.flushToVault(); // flush before plugin closes
+      try {
+        await this.flushToVault(); // flush before plugin closes
+      } catch (err) {
+        console.error('[Finance Tracker] onunload flush failed:', err);
+      }
     }
-    this.fileWatcher.destroy(); // clears pending debounce timer
+    this.fileWatcher?.destroy(); // clears pending debounce timer
   }
 
   // ---------------------------------------------------------------------------
@@ -214,8 +218,11 @@ class FinanceTrackerSettingTab extends PluginSettingTab {
         .setPlaceholder('XOF')
         .setValue(this.plugin.settings.currency)
         .onChange(async (value) => {
-          this.plugin.settings.currency = value.toUpperCase().slice(0, 3);
-          await this.plugin.saveSettings();
+          const trimmed = value.toUpperCase().slice(0, 3);
+          if (trimmed.length > 0) {
+            this.plugin.settings.currency = trimmed;
+            await this.plugin.saveSettings();
+          }
         }));
   }
 }
