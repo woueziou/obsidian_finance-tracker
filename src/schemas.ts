@@ -23,7 +23,7 @@ export const DebtStatusSchema  = z.enum(['open', 'partial', 'paid']);
 // ---------------------------------------------------------------------------
 
 export const ExpenseSchema = z.object({
-  id:       z.string().uuid(),
+  id:       z.uuid(),
   date:     z.string().regex(ISO_DATE_RE, 'Date must be YYYY-MM-DD'),
   amount:   z.number().int().positive(),
   currency: z.string().length(3),
@@ -33,7 +33,7 @@ export const ExpenseSchema = z.object({
 });
 
 export const IncomeSchema = z.object({
-  id:       z.string().uuid(),
+  id:       z.uuid(),
   date:     z.string().regex(ISO_DATE_RE, 'Date must be YYYY-MM-DD'),
   amount:   z.number().int().positive(),
   currency: z.string().length(3),
@@ -43,7 +43,7 @@ export const IncomeSchema = z.object({
 });
 
 export const DebtSchema = z.object({
-  id:           z.string().uuid(),
+  id:           z.uuid(),
   amount:       z.number().int().positive(),
   currency:     z.string().length(3),
   dueDate:      z.string().regex(ISO_DATE_RE, 'Date must be YYYY-MM-DD'),

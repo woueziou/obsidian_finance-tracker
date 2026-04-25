@@ -73,6 +73,8 @@ updated: 2026-04-25
 - Debounce writes 1–2 seconds; never write on every keystroke
 - Lazy-load Chart.js only when dashboard opens
 - Unsubscribe from store subscriptions when views close
+- Install missing npm packages directly without asking (e.g. `npm install zod`)
+- Use `z.uuid()` instead of `z.string().uuid()` in Zod schemas
 
 ### Record Types
 
