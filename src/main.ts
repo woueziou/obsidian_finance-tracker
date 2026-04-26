@@ -12,6 +12,8 @@ import { registerCommands } from './commands/index';
 import { AddExpenseModal } from './commands/addExpense';
 import { AddIncomeModal } from './commands/addIncome';
 import { AddDebtModal } from './commands/addDebt';
+import { DASHBOARD_VIEW_TYPE, DashboardView } from './views/DashboardView';
+import { LEDGER_VIEW_TYPE, LedgerView } from './views/LedgerView';
 
 export default class FinanceTrackerPlugin extends Plugin {
   store!: DataStore;
@@ -36,8 +38,20 @@ export default class FinanceTrackerPlugin extends Plugin {
     );
     // registerEvent ensures Obsidian unregisters the vault listener on plugin unload
     this.registerEvent(this.fileWatcher.eventRef);
+    this.registerView(DASHBOARD_VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
+    this.registerView(LEDGER_VIEW_TYPE, (leaf) => new LedgerView(leaf, this));
     this.registerRibbonButtons();
     registerCommands(this);
+    this.addCommand({
+      id: 'open-dashboard',
+      name: 'Open Dashboard',
+      callback: () => { void this.activateDashboard(); },
+    });
+    this.addCommand({
+      id: 'open-ledger',
+      name: 'Open Ledger',
+      callback: () => { void this.activateLedger(); },
+    });
     this.addSettingTab(new FinanceTrackerSettingTab(this.app, this));
   }
 
@@ -146,9 +160,31 @@ export default class FinanceTrackerPlugin extends Plugin {
   // ---------------------------------------------------------------------------
 
   private registerRibbonButtons(): void {
+    this.addRibbonIcon('bar-chart-2', 'Open Dashboard', () => { void this.activateDashboard(); });
+    this.addRibbonIcon('list', 'Open Ledger', () => { void this.activateLedger(); });
     this.addRibbonIcon('wallet', 'Add Expense', () => new AddExpenseModal(this.app, this).open());
     this.addRibbonIcon('trending-up', 'Add Income', () => new AddIncomeModal(this.app, this).open());
     this.addRibbonIcon('credit-card', 'Add Debt', () => new AddDebtModal(this.app, this).open());
+  }
+
+  async activateDashboard(): Promise<void> {
+    const { workspace } = this.app;
+    let leaf = workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE)[0];
+    if (!leaf) {
+      leaf = workspace.getRightLeaf(false) ?? workspace.getLeaf(true);
+      await leaf.setViewState({ type: DASHBOARD_VIEW_TYPE, active: true });
+    }
+    workspace.revealLeaf(leaf);
+  }
+
+  async activateLedger(): Promise<void> {
+    const { workspace } = this.app;
+    let leaf = workspace.getLeavesOfType(LEDGER_VIEW_TYPE)[0];
+    if (!leaf) {
+      leaf = workspace.getRightLeaf(false) ?? workspace.getLeaf(true);
+      await leaf.setViewState({ type: LEDGER_VIEW_TYPE, active: true });
+    }
+    workspace.revealLeaf(leaf);
   }
 }
 

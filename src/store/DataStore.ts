@@ -6,6 +6,14 @@ import type { Ledger } from '../types.ts';
 import type { Expense, Income, Debt, ExpenseInput, IncomeInput, DebtInput } from '../schemas.ts';
 import { ExpenseSchema, IncomeSchema, DebtSchema } from '../schemas.ts';
 
+export interface DashboardTransaction {
+  date: string;
+  note: string;
+  amount: number;
+  type: string;
+  kind: 'expense' | 'income';
+}
+
 export class DataStore {
   private expenses: Map<string, Expense> = new Map();
   private incomes:  Map<string, Income>  = new Map();
@@ -161,6 +169,53 @@ export class DataStore {
       }
     }
     return summary;
+  }
+
+  getMonthlyIncomeTotal(year: number, month: number): number {
+    return this.getIncomes()
+      .filter(i => {
+        const d = new Date(i.date);
+        return d.getFullYear() === year && d.getMonth() + 1 === month;
+      })
+      .reduce((sum, i) => sum + i.amount, 0);
+  }
+
+  getOpenDebts(): Debt[] {
+    return this.getDebts().filter(d => d.status === 'open' || d.status === 'partial');
+  }
+
+  getCumulativeBalance(from: string, to: string): { labels: string[]; data: number[] } {
+    const days: string[] = [];
+    const cur = new Date(from);
+    const end = new Date(to);
+    while (cur <= end) {
+      days.push(cur.toISOString().slice(0, 10));
+      cur.setDate(cur.getDate() + 1);
+    }
+    const dailyNet: Record<string, number> = {};
+    for (const d of days) dailyNet[d] = 0;
+    for (const e of this.getExpenses()) {
+      if (e.date >= from && e.date <= to) dailyNet[e.date] = (dailyNet[e.date] ?? 0) - e.amount;
+    }
+    for (const i of this.getIncomes()) {
+      if (i.date >= from && i.date <= to) dailyNet[i.date] = (dailyNet[i.date] ?? 0) + i.amount;
+    }
+    let running = 0;
+    const data = days.map(d => { running += (dailyNet[d] as number); return running / 100; });
+    return { labels: days, data };
+  }
+
+  getRecentTransactions(from: string, to: string, limit: number): DashboardTransaction[] {
+    const rows: DashboardTransaction[] = [];
+    for (const e of this.getExpenses()) {
+      if (e.date >= from && e.date <= to)
+        rows.push({ date: e.date, note: e.note ?? '', amount: e.amount, type: e.type, kind: 'expense' });
+    }
+    for (const i of this.getIncomes()) {
+      if (i.date >= from && i.date <= to)
+        rows.push({ date: i.date, note: i.note ?? '', amount: i.amount, type: i.type, kind: 'income' });
+    }
+    return rows.sort((a, b) => b.date.localeCompare(a.date)).slice(0, limit);
   }
 
   // ---------------------------------------------------------------------------

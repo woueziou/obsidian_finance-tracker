@@ -1,5 +1,28 @@
 # Phase 5 — Dashboard View: Implementation Plan
 
+## DataStore Additions (add to `src/store/DataStore.ts`)
+
+Two methods required by `DashboardView.render()` are not yet present in `DataStore.ts` and must be added as part of this phase:
+
+```typescript
+getMonthlyIncomeTotal(year: number, month: number): number {
+  return this.ledger.income
+    .filter(i => {
+      const d = new Date(i.date);
+      return d.getFullYear() === year && d.getMonth() + 1 === month;
+    })
+    .reduce((sum, i) => sum + i.amount, 0);
+}
+
+getOpenDebts(): Debt[] {
+  return this.ledger.debts.filter(d => d.status === 'open' || d.status === 'partial');
+}
+```
+
+Add the `Debt` import alongside existing imports at the top of `DataStore.ts` if not already present.
+
+---
+
 ## View Registration in `main.ts`
 
 ```typescript
@@ -71,6 +94,10 @@ export class DashboardView extends ItemView {
 ```typescript
 private async render(): Promise<void> {
   const { containerEl } = this;
+  // Destroy existing chart instances before clearing the DOM to avoid
+  // "Canvas is already in use" errors on subsequent renders.
+  this.chartInstances.forEach(c => c.destroy());
+  this.chartInstances = [];
   containerEl.empty();
 
   const now = new Date();
@@ -114,9 +141,13 @@ private async render(): Promise<void> {
     const b = btnRow.createEl('button', { text: label, cls: 'mod-cta' });
     b.addEventListener('click', cb);
   };
-  addBtn('+ Expense', () => openAddExpenseModal(this.app, this.plugin));
-  addBtn('+ Income',  () => openAddIncomeModal(this.app, this.plugin));
-  addBtn('+ Debt',    () => openAddDebtModal(this.app, this.plugin));
+  // Import the modal classes at the top of DashboardView.ts:
+  //   import { AddExpenseModal } from '../commands/addExpense';
+  //   import { AddIncomeModal }  from '../commands/addIncome';
+  //   import { AddDebtModal }    from '../commands/addDebt';
+  addBtn('+ Expense', () => new AddExpenseModal(this.app, this.plugin).open());
+  addBtn('+ Income',  () => new AddIncomeModal(this.app, this.plugin).open());
+  addBtn('+ Debt',    () => new AddDebtModal(this.app, this.plugin).open());
 }
 ```
 
