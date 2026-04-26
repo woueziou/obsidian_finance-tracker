@@ -56,7 +56,7 @@ export class AddDebtModal extends Modal {
       .addText(text => {
         text
           .setPlaceholder('2026-06-01')
-          .onChange(v => { this.formData.dueDate = v.trim(); });
+          .onChange(v => { this.formData.dueDate = v.trim() || undefined; });
       });
 
     // Person field (required)
