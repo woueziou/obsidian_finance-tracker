@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-finance-tracker",
+  "name": "Finance Tracker",
+  "version": "0.1.0",
+  "minAppVersion": "1.0.0",
+  "description": "Track expenses, income, and debts in a local markdown ledger.",
+  "author": "Taas S. Ekpaye",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}

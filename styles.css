@@ -1,0 +1,10 @@
+/* Finance Tracker plugin styles */
+/* Uses Obsidian CSS variables — no hard-coded colours */
+
+.finance-tracker-error {
+  color: var(--color-red);
+  font-size: 0.875em;
+  margin: 4px 0 8px;
+  min-height: 1.25em;
+  white-space: pre-line; /* preserve newlines between multiple Zod error messages */
+}

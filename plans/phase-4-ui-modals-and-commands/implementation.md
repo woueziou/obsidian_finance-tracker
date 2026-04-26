@@ -97,6 +97,9 @@ new Setting(contentEl)
     .setButtonText('Add Expense')
     .setCta()
     .onClick(() => this.handleSubmit()));
+
+// Register Enter key to trigger submit (do this in onOpen after buildForm)
+this.scope.register([], 'Enter', () => { this.handleSubmit(); return false; });
 ```
 
 ---
@@ -107,7 +110,10 @@ new Setting(contentEl)
 private handleSubmit(): void {
   this.errorEl.textContent = '';
 
-  const result = ExpenseInputSchema.safeParse(this.formData);
+  // Inject currency from settings — required by schema but not collected in the form
+  const payload = { ...this.formData, currency: this.plugin.settings.currency };
+
+  const result = ExpenseInputSchema.safeParse(payload);
   if (!result.success) {
     const messages = result.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('\n');
     this.errorEl.textContent = messages;
@@ -115,6 +121,7 @@ private handleSubmit(): void {
   }
 
   this.plugin.store.addExpense(result.data);
+  // Note: same currency-inject pattern applies to AddIncomeModal and AddDebtModal handleSubmit()
   this.plugin.scheduleWrite();
   new Notice('Expense added!');
   this.close();
@@ -184,6 +191,24 @@ export function registerCommands(plugin: FinanceTrackerPlugin): void {
 
 Call `registerCommands(this)` from `main.ts` `onload()`, replacing the Phase 3 stubs.
 
+**Editing `main.ts`:** Remove the existing private `registerCommands()` method entirely and replace the call site in `onload()` with `registerCommands(this)` (imported from `./commands/index`). Also update `registerRibbonButtons()` to open the real modals instead of showing a Notice stub:
+
+```typescript
+private registerRibbonButtons(): void {
+  this.addRibbonIcon('wallet', 'Add Expense', () => new AddExpenseModal(this.app, this).open());
+  this.addRibbonIcon('trending-up', 'Add Income', () => new AddIncomeModal(this.app, this).open());
+  this.addRibbonIcon('credit-card', 'Add Debt', () => new AddDebtModal(this.app, this).open());
+}
+```
+
+Add these imports to `main.ts`:
+```typescript
+import { registerCommands } from './commands/index';
+import { AddExpenseModal } from './commands/addExpense';
+import { AddIncomeModal }  from './commands/addIncome';
+import { AddDebtModal }    from './commands/addDebt';
+```
+
 ---
 
 ## Currency in Form
@@ -209,4 +234,4 @@ Add a `styles.css` file with:
 }
 ```
 
-This file is automatically loaded by Obsidian if listed in `manifest.json` (it is by default).
+Obsidian loads `styles.css` automatically when it sits next to `main.js` in the plugin folder — no `manifest.json` entry is needed.
