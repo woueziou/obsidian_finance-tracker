@@ -54,6 +54,8 @@ async onload(): Promise<void> {
     () => this.isWriting,
     () => this.handleExternalChange(),
   );
+  // registerEvent ensures Obsidian unregisters the vault listener on plugin unload
+  this.registerEvent(this.fileWatcher.eventRef);
   this.registerRibbonButtons();
   this.registerCommands();
   this.addSettingTab(new FinanceTrackerSettingTab(this.app, this));
@@ -129,6 +131,23 @@ async onunload(): Promise<void> {
   if (this.saveTimer) {
     clearTimeout(this.saveTimer);
     await this.flushToVault();  // flush before plugin closes
+  }
+  this.fileWatcher.destroy(); // clears pending debounce timer
+}
+
+private async handleExternalChange(): Promise<void> {
+  // Re-read the ledger file and reload the store when an external edit is detected
+  const file = this.app.vault.getFileByPath(this.settings.ledgerPath);
+  if (!file) return;
+  try {
+    const content = await this.app.vault.read(file);
+    const { ledger, errors } = MarkdownSerializer.deserialize(content);
+    if (errors.length > 0) {
+      errors.forEach(e => console.warn(`[Finance Tracker] Line ${e.line}: ${e.message}`));
+    }
+    this.store.load(ledger);
+  } catch (err) {
+    console.error('[Finance Tracker] handleExternalChange failed:', err);
   }
 }
 ```

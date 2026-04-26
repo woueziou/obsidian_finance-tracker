@@ -125,7 +125,15 @@ For each file created or modified by menelik, check:
 - No external HTTP calls (all processing is local per project rules)
 - User input sanitized before being written to markdown
 
-### 6. Report
+### 6. Update Validation Checklist
+After verifying each item in `plans/<phase-name>/validation.md`, **update the file in place** to reflect the current status:
+- Mark passing items: `- [x] item text`
+- Mark failing items: `- [ ] ~~item text~~ — ❌ <short reason>`
+- Leave untested items (e.g. manual/Obsidian-only tests) as `- [ ]` with a `(manual)` note
+
+This keeps `validation.md` as a live status document — not just a static checklist.
+
+### 7. Report
 After completing validation, write a review file at `plans/<phase-name>/ganfam-review.md`:
 
 ```markdown

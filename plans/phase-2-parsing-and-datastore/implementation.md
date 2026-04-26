@@ -9,10 +9,23 @@ Each parser is a **pure function** — no class, no side effects:
 export function parseExpenses(
   lines: string[],
   startIndex: number,  // index of "## Expenses" line
-): { expenses: Expense[]; errors: ParseError[] }
+): { expenses: ParsedExpense[]; errors: ParseError[] }
 ```
 
 `MarkdownSerializer.deserialize()` splits the file into lines, locates section headers, and dispatches to each parser with the relevant line slice.
+
+### Internal parsed types
+
+Parsers return records **without an `id` field**. To make this explicit, each parser file declares a local type alias:
+
+```typescript
+// internal to each parser file — NOT exported from types.ts
+type ParsedExpense = Omit<Expense, 'id'>;
+type ParsedIncome  = Omit<Income,  'id'>;
+type ParsedDebt    = Omit<Debt,    'id'>;
+```
+
+These are internal implementation details. They must not be added to `src/types.ts` or re-exported from `src/parsers/index.ts`. `DataStore.load()` receives a fully-hydrated `Ledger` (IDs already assigned by `MarkdownSerializer.deserialize()`); it does not assign IDs itself.
 
 ---
 
@@ -41,13 +54,13 @@ for each line:
       currency = match[3]
       location = match[4]?.trim() or undefined
       note = match[5].trim()
-      push Expense object (id assigned later by DataStore)
+      push ParsedExpense object (id is absent — assigned later by MarkdownSerializer.deserialize)
   if line matches /^## / and not the expense heading → stop (new section)
 ```
 
 ### ID assignment
 
-Parsers do not assign IDs. They return records without `id`. `DataStore.load()` assigns `crypto.randomUUID()` to each during bulk load.
+Parsers do not assign IDs. They return `ParsedExpense[]` — records with no `id` field. `MarkdownSerializer.deserialize()` is the component that calls `crypto.randomUUID()` and promotes each `ParsedExpense` to a full `Expense`. By the time `DataStore.load()` is called, every record already has an `id`.
 
 ---
 
@@ -85,8 +98,11 @@ Debt lines do not use date headings — they live flat under `## Debts`.
 2. Split remaining content into lines
 3. Locate section header indices
 4. Call expenseParser, incomeParser, debtParser with their respective line slices
-5. Assign UUIDs to all parsed records
+   → each parser returns ParsedExpense[] / ParsedIncome[] / ParsedDebt[] (no id field)
+5. Assign UUIDs to all parsed records via crypto.randomUUID()
+   → this is the ONLY place IDs are minted during a file load
 6. Return { ledger: { expenses, incomes, debts, meta }, errors }
+   → ledger.expenses are fully-typed Expense[] with ids at this point
 ```
 
 ### `serialize(store: DataStore, meta: LedgerMeta): string`
@@ -117,6 +133,9 @@ class DataStore {
   private debts:    Map<string, Debt>    = new Map();
   private listeners: Set<() => void>     = new Set();
 
+  // load() receives a fully-hydrated Ledger — IDs already assigned by
+  // MarkdownSerializer.deserialize(). DataStore.load() does NOT call
+  // crypto.randomUUID(); it only indexes the records by their existing id.
   load(ledger: Ledger): void {
     this.expenses.clear();
     this.incomes.clear();
@@ -127,6 +146,9 @@ class DataStore {
     this.notify();
   }
 
+  // addExpense() is used by modals (user-initiated record creation).
+  // It receives ExpenseInput (no id) and mints a new UUID here.
+  // This is DIFFERENT from load(), which receives records that already have ids.
   addExpense(input: ExpenseInput): Expense {
     const record = { ...input, id: crypto.randomUUID() };
     ExpenseSchema.parse(record); // validate

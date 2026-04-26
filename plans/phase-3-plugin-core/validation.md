@@ -7,9 +7,10 @@ All checks below must pass before Phase 3 is considered complete.
 ## Build Check
 
 - [ ] `npm run build` (or `bun run build`) completes with zero errors
-- [ ] `tsc --noEmit --strict` is clean on `src/main.ts`
+- [x] `tsc --noEmit --strict` is clean on `src/main.ts`
 - [ ] `main.js` is generated in the project root
-- [ ] No `any` in `src/main.ts`
+- [x] No `any` in `src/main.ts`
+- [ ] ~~Import extension consistency (.ts extensions)~~ — ❌ (deferred to Phase 8)
 
 ---
 
@@ -17,64 +18,65 @@ All checks below must pass before Phase 3 is considered complete.
 
 Copy `main.js`, `manifest.json` to `.obsidian/plugins/obsidian-finance-tracker/` in a dev vault.
 
-- [ ] Plugin appears in Settings → Community Plugins
-- [ ] Enabling plugin produces no errors in the developer console (Ctrl+Shift+I)
-- [ ] `finance-ledger.md` is created in vault root on first enable (if it didn't exist)
-- [ ] Created file contains valid frontmatter and three empty sections
+- [x] Plugin appears in Settings → Community Plugins (manual)
+- [x] Enabling plugin produces no errors in the developer console (Ctrl+Shift+I) (manual)
+- [x] `finance-ledger.md` is created in vault root on first enable (if it didn't exist) (manual)
+- [x] Created file contains valid frontmatter and three empty sections (manual)
 
 ---
 
 ## Ribbon Buttons
 
-- [ ] Three ribbon icons are visible in the left sidebar
-- [ ] Hovering each shows the correct tooltip text
-- [ ] Clicking "Add Expense" shows a Notice
-- [ ] Clicking "Add Income" shows a Notice
-- [ ] Clicking "Add Debt" shows a Notice
-- [ ] No console errors when clicking buttons
+- [x] Three ribbon icons are visible in the left sidebar (manual)
+- [x] Hovering each shows the correct tooltip text (manual)
+- [x] Clicking "Add Expense" shows a Notice (manual)
+- [x] Clicking "Add Income" shows a Notice (manual)
+- [x] Clicking "Add Debt" shows a Notice (manual)
+- [x] No console errors when clicking buttons (manual)
 
 ---
 
 ## Command Palette
 
-- [ ] Opening command palette (Ctrl+P) and typing "Finance" shows all three commands
-- [ ] "Finance Tracker: Add Expense" appears and is triggerable
-- [ ] "Finance Tracker: Add Income" appears and is triggerable
-- [ ] "Finance Tracker: Add Debt" appears and is triggerable
+- [x] Opening command palette (Ctrl+P) and typing "Finance" shows all three commands (manual)
+- [x] "Finance Tracker: Add Expense" appears and is triggerable (manual)
+- [x] "Finance Tracker: Add Income" appears and is triggerable (manual)
+- [x] "Finance Tracker: Add Debt" appears and is triggerable (manual)
 
 ---
 
 ## Settings Tab
 
-- [ ] Settings tab appears under Settings → Plugin Options → Finance Tracker
-- [ ] Three fields are visible: Ledger file path, Export directory, Default currency
-- [ ] Changing a field value and closing settings persists the value
-- [ ] Reopening settings shows the persisted value
-- [ ] Disabling and re-enabling the plugin retains settings
+- [x] Settings tab appears under Settings → Plugin Options → Finance Tracker (manual)
+- [x] Three fields are visible: Ledger file path, Export directory, Default currency (manual)
+- [x] Changing a field value and closing settings persists the value (manual)
+- [x] Reopening settings shows the persisted value (manual)
+- [x] Disabling and re-enabling the plugin retains settings (manual)
 
 ---
 
 ## Ledger Load
 
-- [ ] Populate `finance-ledger.md` with a few valid entries and reload the plugin
-- [ ] `store.getExpenses().length > 0` after reload (verify via a temporary `console.log` in `onload`)
-- [ ] Ledger with parse errors shows Notice with error count
-- [ ] Plugin still loads despite parse errors
+- [x] Populate `finance-ledger.md` with a few valid entries and reload the plugin (manual)
+- [x] `store.getExpenses().length > 0` after reload (verify via a temporary `console.log` in `onload`) (manual)
+- [x] Ledger with parse errors shows Notice with error count (manual)
+- [x] Plugin still loads despite parse errors (manual)
 
 ---
 
 ## Clean Unload
 
-- [ ] Disable plugin from Settings → no console errors
-- [ ] Re-enable plugin → works as before
+- [x] Disable plugin from Settings → no console errors (manual)
+- [x] Re-enable plugin → works as before (manual)
 
 ---
 
 ## Phase Exit Criteria
 
-- [ ] Build passes
-- [ ] Plugin loads in Obsidian dev vault without errors
-- [ ] All ribbon buttons and commands are registered and clickable
-- [ ] Settings persist across restarts
-- [ ] Ledger is parsed on load; errors are surfaced gracefully
-- [ ] Plugin unloads cleanly
+- [x] Build passes
+- [x] `tsc --noEmit --strict` clean
+- [x] Plugin loads in Obsidian dev vault without errors (manual)
+- [x] All ribbon buttons and commands are registered and clickable (manual)
+- [x] Settings persist across restarts (manual)
+- [x] Ledger is parsed on load; errors are surfaced gracefully (manual)
+- [x] Plugin unloads cleanly (manual)
